@@ -1,8 +1,8 @@
 {
-    "name": "com.phonegap.helloworld",
+    "name": "com.phonegap.mediscanner",
     "version": "1.0.0",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "displayName": "helloworld"
+    "displayName": "Medi Scanner"
 }
