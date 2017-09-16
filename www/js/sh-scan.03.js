@@ -101,8 +101,8 @@ function loadIndexPage() {
         success: function (data) {
             osKey = data[0].keyvalue;
         },
-        error: function () {
-            myApp.alert("bad");
+        error: function (xhr, status) {
+            myApp.alert("Error Getting Keys: " + xhr.responseText);
         }
     });
 
@@ -117,8 +117,8 @@ function loadIndexPage() {
         success: function (data) {
             $$('#new-scans-badge').text(data.count);
         },
-        error: function () {
-            myApp.alert("Error: Main page");
+        error: function (xhr, status) {
+            myApp.alert("Error New Scan Count: " + xhr.responseText);
         }
     });
 }
@@ -150,8 +150,8 @@ function loadNewScans() {
             }
             $$('#new-scans-list').html(htmlObj);
         },
-        error: function () {
-            myApp.alert("Error: New scan page");
+        error: function (xhr, status) {
+            myApp.alert("Error New Scans: " + xhr.responseText);
         }
     });
 }
@@ -183,8 +183,8 @@ function loadHistory() {
             }
             $$('#history-scans-list').html(htmlObj);
         },
-        error: function () {
-            myApp.alert("Error: History page");
+        error: function (xhr, status) {
+            myApp.alert("Error History: " + xhr.responseText);
         }
     });
 }
@@ -218,8 +218,8 @@ function loadHistoryCategory() {
 
             
         },
-        error: function (xhr, ajaxOptions, thrownError) {
-            myApp.alert("Error: History Category Error - " + thrownError);
+        error: function (xhr, status) {
+            myApp.alert("Error History Category: " + xhr.responseText);
         }
     });
 }
@@ -253,8 +253,8 @@ function openPhotoBrowser(scanid) {
             myPhotoBrowserPage.open();
 
         },
-        error: function (e) {
-            myApp.alert("Error: Image Viewer - " + e.message);
+        error: function (xhr, status) {
+            myApp.alert("Error Image Viewer: " + xhr.responseText);
         }
     });
 }
@@ -273,8 +273,8 @@ function updateScanReadValue(scanid) {
         success: function (data) {
 
         },
-        error: function (e) {
-            myApp.alert("Error: Image Viewer - " + e.message);
+        error: function (xhr, status) {
+            myApp.alert("Error Update Scan: " + xhr.responseText);
         }
     });
 }
