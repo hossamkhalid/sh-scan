@@ -103,6 +103,7 @@ function loadIndexPage() {
         },
         error: function (xhr, status) {
             myApp.alert("Error Getting Keys: " + xhr.responseText);
+            myApp.alert("Error Getting Keys: " + status);
         }
     });
 
@@ -119,6 +120,7 @@ function loadIndexPage() {
         },
         error: function (xhr, status) {
             myApp.alert("Error New Scan Count: " + xhr.responseText);
+            myApp.alert("Error New Scan Count: " + status);
         }
     });
 }
