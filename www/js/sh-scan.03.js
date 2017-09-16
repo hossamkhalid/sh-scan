@@ -181,12 +181,21 @@ function loadHistory() {
                 } else {
                     folderHtml = '<div class="item-media"><i class="f7-icons">folder</i></div>';
                 }
-                htmlObj += '<li><a href="#" class="item-link item-content pb-page" scanid="' + data[i].id + '" isnewscan="' + data[i].isnew + '">';
+                htmlObj += '<li class="swipeout">';
+                //htmlObj += '<div class="swipeout-content item-content">';
+                htmlObj += '<a href="#" class="swipeout-content item-link item-content pb-page" scanid="' + data[i].id + '" isnewscan="' + data[i].isnew + '">';
                 htmlObj += folderHtml;
                 htmlObj += '<div class="item-inner">';
-                htmlObj += '<div class="item-title-row"><div class="item-title">' + data[i].category + '</div><div class="item-after">' + timestampToDateTime(data[i].scandate) + '</div></div>';
+                htmlObj += '<div class="item-title-row">';
+                htmlObj += '<div class="item-title">' + data[i].category + '</div>';
+                htmlObj += '<div class="item-after">' + timestampToDateTime(data[i].scandate) + '</div>';
+                htmlObj += '</div>';
                 htmlObj += '<div class="item-subtitle">' + data[i].lab.name + '</div>';
-                htmlObj += '</div></a></li>';
+                htmlObj += '</div>';
+                htmlObj += '</a>';
+                //htmlObj += '</div>';
+                htmlObj += '<div class="swipeout-actions-left"><a href="#" class="action1 bg-lightblue" linktype ="share" scanid="' + data[i].id + '"><i class="f7-icons">forward_fill</i></a></div>';
+                htmlObj += '</li>';
             }
             $$('#history-scans-list').html(htmlObj);
         },
@@ -394,6 +403,6 @@ $$(document).on('click', 'a[scan-type="history-category"]', function (e) {
     loadHistory(scanValue);
 });
 
-$$(document).on('click', 'a[id="loginButton"]', function (e) {
-    
+$$(document).on('click', 'a[linktype="share"]', function (e) {
+    myApp.alert("Sharing scan " + $$(this).attr("scanid") + "...");
 });
