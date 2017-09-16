@@ -9,7 +9,6 @@
             * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
-                <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
         -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
 
@@ -241,56 +240,11 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="TOPOGRAPHY">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-TOPOGRAPHY">folder</i></div>
-                                        <div class="item-inner">
-                                            <div class="item-title">TOPOGRAPHY</div>
-                                            <div class="item-after"><span class="badge" id="history-category-TOPOGRAPHY">0</span></div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="SONAR">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-SONAR">folder</i></div>
-                                        <div class="item-inner">
-                                            <div class="item-title">SONAR</div>
-                                            <div class="item-after"><span class="badge" id="history-category-SONAR">0</span></div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="ECG">
                                         <div class="item-media"><i class="f7-icons" id="history-category-new-ECG">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">ECG</div>
                                             <div class="item-after"><span class="badge" id="history-category-ECG">0</span></div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MRI">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-MRI">folder</i></div>
-                                        <div class="item-inner">
-                                            <div class="item-title">MRI</div>
-                                            <div class="item-after"><span class="badge" id="history-category-MRI">0</span></div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="X-RAY">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-X-RAY">folder</i></div>
-                                        <div class="item-inner">
-                                            <div class="item-title">X-RAY</div>
-                                            <div class="item-after"><span class="badge" id="history-category-X-RAY">0</span></div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="PET">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-PET">folder</i></div>
-                                        <div class="item-inner">
-                                            <div class="item-title">PET</div>
-                                            <div class="item-after"><span class="badge" id="history-category-PET">0</span></div>
                                         </div>
                                     </a>
                                 </li>
@@ -304,11 +258,56 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MRI">
+                                        <div class="item-media"><i class="f7-icons" id="history-category-new-MRI">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">MRI</div>
+                                            <div class="item-after"><span class="badge" id="history-category-MRI">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MULI-SLICE">
                                         <div class="item-media"><i class="f7-icons" id="history-category-new-MULTI-SLICE">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">MULTI-SLICE</div>
                                             <div class="item-after"><span class="badge" id="history-category-MULTI-SLICE">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="PET">
+                                        <div class="item-media"><i class="f7-icons" id="history-category-new-PET">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">PET</div>
+                                            <div class="item-after"><span class="badge" id="history-category-PET">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="SONAR">
+                                        <div class="item-media"><i class="f7-icons" id="history-category-new-SONAR">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">SONAR</div>
+                                            <div class="item-after"><span class="badge" id="history-category-SONAR">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="TOPOGRAPHY">
+                                        <div class="item-media"><i class="f7-icons" id="history-category-new-TOPOGRAPHY">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">TOPOGRAPHY</div>
+                                            <div class="item-after"><span class="badge" id="history-category-TOPOGRAPHY">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="X-RAY">
+                                        <div class="item-media"><i class="f7-icons" id="history-category-new-X-RAY">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">X-RAY</div>
+                                            <div class="item-after"><span class="badge" id="history-category-X-RAY">0</span></div>
                                         </div>
                                     </a>
                                 </li>
