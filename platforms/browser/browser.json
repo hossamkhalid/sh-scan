@@ -4,13 +4,27 @@
         "uninstalled": []
     },
     "config_munge": {
-        "files": {}
+        "files": {
+            "config.xml": {
+                "parents": {
+                    "/*": [
+                        {
+                            "xml": "<feature name=\"Device\"><param name=\"browser-package\" value=\"Device\" /></feature>",
+                            "count": 1
+                        }
+                    ]
+                }
+            }
+        }
     },
     "installed_plugins": {
         "cordova-plugin-console": {
             "PACKAGE_NAME": "com.phonegap.helloworld"
         },
         "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "com.phonegap.helloworld"
+        },
+        "cordova-plugin-device": {
             "PACKAGE_NAME": "com.phonegap.helloworld"
         }
     },
@@ -23,10 +37,25 @@
             "clobbers": [
                 "window.StatusBar"
             ]
+        },
+        {
+            "file": "plugins/cordova-plugin-device/www/device.js",
+            "id": "cordova-plugin-device.device",
+            "pluginId": "cordova-plugin-device",
+            "clobbers": [
+                "device"
+            ]
+        },
+        {
+            "file": "plugins/cordova-plugin-device/src/browser/DeviceProxy.js",
+            "id": "cordova-plugin-device.DeviceProxy",
+            "pluginId": "cordova-plugin-device",
+            "runs": true
         }
     ],
     "plugin_metadata": {
         "cordova-plugin-console": "1.0.7",
-        "cordova-plugin-statusbar": "1.0.1"
+        "cordova-plugin-statusbar": "1.0.1",
+        "cordova-plugin-device": "1.1.6"
     }
 }
