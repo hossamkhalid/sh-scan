@@ -9,6 +9,9 @@ var $$ = Dom7;
 var osKey = "";
 var cats = ['CT', 'TOPOGRAPHY', 'SONAR', 'ECG', 'MRI', 'X-RAY', 'PET', 'ECHO', 'MULTI-SLICE'];
 var scanValue = "";
+var ibmClientId = "";
+var ibmClientSecret = "";
+var patientId = "";
 // Add view
 var mainView = myApp.addView('.view-main', {
     // Because we want to use dynamic navbar, we need to enable it for this view:
@@ -21,19 +24,23 @@ function photoBroswer() {
 }
 
 function getClientId() {
-    return "57987393-262e-4445-a056-254bd3196e14";
+    return ibmClientId;
 }
 
 function getClientSecret() {
-    return "T3tS7bG7fT1tD2wS6tR7eG7jX3uO6kE6kF3fE3fA7dA8nM1yK0";
+    return ibmClientSecret;
 }
 
 function getPatientId() {
-    return "f8618d33c25ab1927d1175a0b776357a";
+    return patientId;
 }
 
 function getApiBasePath() {
     return "https://api.eu.apiconnect.ibmcloud.com/hksandbox-dev/shscancatalog/api/";
+}
+
+function getSecurityBasePath() {
+    return "https://api.eu.apiconnect.ibmcloud.com/hksandbox-dev/shscancatalog/sh-scanner-security/";
 }
 
 function getOsBasePath() {
@@ -103,7 +110,6 @@ function loadIndexPage() {
         },
         error: function (xhr, status) {
             myApp.alert("Error Getting Keys: " + xhr.responseText);
-            myApp.alert("Error Getting Keys: " + status);
         }
     });
 
@@ -120,7 +126,6 @@ function loadIndexPage() {
         },
         error: function (xhr, status) {
             myApp.alert("Error New Scan Count: " + xhr.responseText);
-            myApp.alert("Error New Scan Count: " + status);
         }
     });
 }
@@ -196,7 +201,7 @@ function loadHistoryCategory() {
         type: "GET",
         headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
         data: "",
-        url: getApiBasePath() + "scans?filter[where][patient]=f8618d33c25ab1927d1175a0b776357a",
+        url: getApiBasePath() + "scans?filter[where][patient]=" + getPatientId(),
         timeout: 15000,
         dataType: 'json',
         cache: false,
@@ -211,14 +216,12 @@ function loadHistoryCategory() {
                 count++;
                 $$('#history-category-' + data[i].category).text(count);
 
-                if(data[i].isnew == "Y") {
+                if (data[i].isnew == "Y") {
                     var icon = $$('#history-category-new-' + data[i].category).text();
                     icon += "_fill";
                     $$('#history-category-new-' + data[i].category).text(icon);
                 }
             }
-
-            
         },
         error: function (xhr, status) {
             myApp.alert("Error History Category: " + xhr.responseText);
@@ -281,13 +284,76 @@ function updateScanReadValue(scanid) {
     });
 }
 
+function login(username, password) {
+    var obj = { 'email': username, 'hash': password };
+    $$.ajax({
+        type: "POST",
+        data: JSON.stringify(obj),
+        contentType: 'application/json',
+        url: getSecurityBasePath() + "login",
+        timeout: 15000,
+        dataType: 'json',
+        cache: false,
+        success: function (data) {
+            if (data.code === 0) {
+                ibmClientId = data.key;
+                ibmClientSecret = data.secret;
+                patientId = data.patientid;
+                loadIndexPage();
+                myApp.closeModal('.login-screen');
+            } else {
+                myApp.alert("Invalid credentials");
+            }
+        },
+        error: function (xhr, status) {
+            myApp.alert("Error during login: " + xhr.responseText);
+        }
+    });
+}
+
+function loginDevice(deviceid) {
+    var obj = { 'deviceid': deviceid };
+    $$.ajax({
+        type: "POST",
+        data: JSON.stringify(obj),
+        contentType: 'application/json',
+        url: getSecurityBasePath() + "logindevice",
+        timeout: 15000,
+        dataType: 'json',
+        cache: false,
+        success: function (data) {
+            if (data.code === 0) {
+                ibmClientId = data.key;
+                ibmClientSecret = data.secret;
+                patientId = data.patientid;
+                loadIndexPage();
+            } else {
+                myApp.loginScreen();
+            }
+        },
+        error: function (xhr, status) {
+            myApp.alert("Error during login: " + xhr.responseText);
+        }
+    });
+}
+
+$$('.login-screen .list-button').on('click', function () {
+    var username = $$('.login-screen input[name="username"]').val().trim();
+    var password = $$('.login-screen input[name="password"]').val();
+    login(username, password); 
+});
+
 // Handle Cordova Device Events
 $$(document).on('deviceready', function () {
-    loadIndexPage();
+    loginDevice(device.uuid);
+    //loadIndexPage();
+    //myApp.alert("No Wait");
+    //myApp.loginScreen();
 });
 
 $$(document).on('pageReinit', '.page[data-page="index"]', function (e) {
     loadIndexPage();
+    //myApp.loginScreen();
 })
 
 $$(document).on('pageInit', '.page[data-page="new-scans"]', function (e) {
@@ -326,4 +392,8 @@ $$(document).on('click', '.pb-page', function (e) {
 $$(document).on('click', 'a[scan-type="history-category"]', function (e) {
     scanValue = $$(this).attr("scan-value");
     loadHistory(scanValue);
+});
+
+$$(document).on('click', 'a[id="loginButton"]', function (e) {
+    
 });
