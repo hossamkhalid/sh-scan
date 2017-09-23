@@ -8,11 +8,12 @@ var myApp = new Framework7({
 var $$ = Dom7;
 
 var osKey = "";
-var cats = ['CT', 'TOPOGRAPHY', 'SONAR', 'ECG', 'MRI', 'X-RAY', 'PET', 'ECHO', 'MULTI-SLICE'];
+var cats = ['CT', 'ECG', 'ECHO', 'EYE-SONAR', 'FIELD-OF-VISION', 'FLUORESCEIN-ANGIO', 'MRI', 'MULTI-SLICE', 'OCT', 'PENTACAM', 'PET', 'SONAR', 'TOPOGRAPHY', 'X-RAY'];
 var scanValue = "";
 var ibmClientId = "";
 var ibmClientSecret = "";
 var patientId = "";
+
 // Add view
 var mainView = myApp.addView('.view-main', {
     // Because we want to use dynamic navbar, we need to enable it for this view:
@@ -128,8 +129,11 @@ function loadIndexPage() {
         cache: false,
         success: function (data) {
             $$('#new-scans-badge').text(data.count);
-            if (data.count > 0)
-                $$('new-scans-notification').html += '<span class="badge bg-red">' + data.count + '</span>';
+            if (data.count > 0) {
+                var notificationHtml = "bell";
+                window.localStorage.setItem("sh-scan-new-notification", data.count + "");
+                $$('i[name="new-scans-notification"]').html(notificationHtml + '<span class="badge bg-red">' + data.count + '</span>');
+            }
         },
         error: function (xhr, status) {
             myApp.alert("Error New Scan Count: " + xhr.responseText);
@@ -175,6 +179,13 @@ function loadNewScans() {
 
 function loadHistory() {
     myApp.showPreloader();
+    var newNotificationCount = window.localStorage.getItem("sh-scan-new-notification");
+    var notificationHtml = "bell";
+    if (newNotificationCount > 0) {
+        $$('i[name="new-scans-notification"]').html(notificationHtml + '<span class="badge bg-red">' + newNotificationCount + '</span>');
+    } else {
+        $$('i[name="new-scans-notification"]').html(notificationHtml);
+    }
     $$.ajax({
         type: "GET",
         headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
@@ -325,16 +336,21 @@ function loadHistoryCategory() {
             }
             myApp.hidePreloader();
         }
-    }
-    
+    }  
 }
 
-function openPhotoBrowser(scanid) {
+function clearHistoryCategoryCache() {
+    window.localStorage.removeItem("sh-scan-new-notification");
+    window.localStorage.removeItem("sh-scan-cache-history-category");
+    window.localStorage.removeItem("sh-scan-cache-history-category-expiry");
+}
+
+function openPhotoBrowser(scanid, isNewScan) {
     $$.ajax({
         type: "GET",
         headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
         data: "",
-        url: getApiBasePath() + "images?filter[where][scan]=" + scanid,
+        url: getApiBasePath() + "images?filter[where][and][0][scan]=" + scanid + "&filter[where][and][1][patient]=" + getPatientId(),
         timeout: 15000,
         dataType: 'json',
         cache: false,
@@ -355,7 +371,8 @@ function openPhotoBrowser(scanid) {
                 exposition: false
             });
 
-            updateScanReadValue(scanid);
+            if (isNewScan == "Y")
+                updateScanReadValue(scanid);
 
             myPhotoBrowserPage.open();
         },
@@ -372,12 +389,22 @@ function updateScanReadValue(scanid) {
         data: {
             "isnew": "N"
         },
-        url: getApiBasePath() + "scans/update?where[id]=" + scanid,
+        url: getApiBasePath() + "scans/update?where[and][0][id]=" + scanid + "&where[and][1][patient]=" + getPatientId(),
         timeout: 15000,
         dataType: 'json',
         cache: false,
         success: function (data) {
-
+            var newNotificationCount = window.localStorage.getItem("sh-scan-new-notification");
+            if (newNotificationCount > 0) {
+                newNotificationCount--;
+                window.localStorage.setItem("sh-scan-new-notification", newNotificationCount + "");
+            }
+            var notificationHtml = "bell";
+            if (newNotificationCount > 0) {
+                $$('i[name="new-scans-notification"]').html(notificationHtml + '<span class="badge bg-red">' + newNotificationCount + '</span>');
+            } else {
+                $$('i[name="new-scans-notification"]').html(notificationHtml);
+            }
         },
         error: function (xhr, status) {
             myApp.alert("Error Update Scan: " + xhr.responseText);
@@ -398,15 +425,16 @@ function login(username, password) {
         cache: false,
         success: function (data) {
             if (data.code == 0) {
-                
                 ibmClientId = data.key;
-                console.log(ibmClientId);
                 ibmClientSecret = data.secret;
-                console.log(ibmClientSecret);
                 patientId = data.patientid;
-                console.log(patientId);
                 window.localStorage.setItem("sh-scan-id", patientId);
-                console.log(window.localStorage.getItem("sh-scan-id"));
+                window.localStorage.setItem("sh-scan-device-id", data.deviceid);
+                if (data.active) {
+                    window.localStorage.setItem("sh-scan-activated", "true");
+                } else {
+                    window.localStorage.setItem("sh-scan-activated", "false");
+                }                
                 loadIndexPage();
                 myApp.closeModal('.login-screen');                
                 
@@ -423,37 +451,60 @@ function login(username, password) {
     });
 }
 
-function loginDevice(deviceid) {
+function loginDevice() {
 
-    var obj = { 'deviceid': window.localStorage.getItem("sh-scan-id") };
-
-    $$.ajax({
-        type: "POST",
-        data: JSON.stringify(obj),
-        contentType: 'application/json',
-        url: getSecurityBasePath() + "logindevice",
-        timeout: 15000,
-        dataType: 'json',
-        cache: false,
-        success: function (data) {
-            if (data.code === 0) {
-                ibmClientId = data.key;
-                ibmClientSecret = data.secret;
-                patientId = data.patientid;
-                window.localStorage.setItem("sh-scan-id", patientId);
-                loadIndexPage();
+    var obj = { 'deviceid': window.localStorage.getItem("sh-scan-device-id") };
+    console.log(JSON.stringify(obj));
+    var activated = window.localStorage.getItem("sh-scan-activated");
+    console.log(activated);
+    if (activated == "false") {
+        console.log("Not activated");
+        $$('#activateScreen').removeClass('hiddenItem');
+        $$('#loginScreen').addClass('hiddenItem');
+        myApp.hidePreloader();
+        myApp.loginScreen();
+    } else {
+        console.log("activated");
+        $$.ajax({
+            type: "POST",
+            data: JSON.stringify(obj),
+            contentType: 'application/json',
+            url: getSecurityBasePath() + "logindevice",
+            timeout: 15000,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                if (data.code === 0) {
+                    if (data.active) {
+                        ibmClientId = data.key;
+                        ibmClientSecret = data.secret;
+                        patientId = data.patientid;
+                        console.log("here");
+                        window.localStorage.setItem("sh-scan-id", patientId);
+                        window.localStorage.setItem("sh-scan-device-id", obj.deviceid);
+                        window.localStorage.setItem("sh-scan-activated", "true");
+                        loadIndexPage();
+                        myApp.hidePreloader();
+                    } else {
+                        console.log("Not activated");
+                        window.localStorage.setItem("sh-scan-activated", "false");
+                        $$('#activateScreen').removeClass('hiddenItem');
+                        $$('#loginScreen').addClass('hiddenItem');
+                        myApp.hidePreloader();
+                        myApp.loginScreen();
+                    }
+                } else {
+                    myApp.hidePreloader();
+                    myApp.loginScreen();
+                }
+            },
+            error: function (xhr, status) {
                 myApp.hidePreloader();
-            } else {
-                myApp.hidePreloader();
-                myApp.loginScreen();
+                myApp.alert("Error during login: " + xhr.responseText);
+                console.log("Error during login: " + xhr.status);
             }
-        },
-        error: function (xhr, status) {
-            myApp.hidePreloader();
-            myApp.alert("Error during login: " + xhr.responseText);
-            console.log("Error during login: " + xhr.status);
-        }
-    });
+        });
+    }
 }
 
 function loadSettings() {
@@ -474,8 +525,7 @@ function isCacheExpired(timestamp) {
     }
 
     var current = Math.floor(Date.now() / 1000);
-    current += 300;
-    if (timestamp < current) {
+    if (timestamp >= current) {
         return false;
     }
     return true;
@@ -487,16 +537,16 @@ function getNewExpiry() {
     return current;
 }
 
-$$('.login-screen .list-button').on('click', function () {
-    var username = $$('.login-screen input[name="username"]').val().trim();
-    var password = $$('.login-screen input[name="password"]').val();
+$$('#loginBtn').on('click', function () {
+    var username = $$('#loginEmail').val().trim();
+    var password = $$('#loginPassword').val();
     login(username, password); 
 });
 
 // Handle Cordova Device Events
 $$(document).on('deviceready', function () {
     myApp.showPreloader();
-    loginDevice(device.uuid);
+    loginDevice();
     //loadIndexPage();
     //myApp.alert("No Wait");
     //myApp.loginScreen();
@@ -534,10 +584,10 @@ $$(document).on('pageReinit', '.page[data-page="history-category"]', function (e
 $$(document).on('click', '.pb-page', function (e) {
     var scanid = $$(this).attr("scanid");
     var isNewScan = $$(this).attr("isnewscan");
-    openPhotoBrowser(scanid);
+    openPhotoBrowser(scanid, isNewScan);
 
-    if (isNewScan == "Y")
-        updateScanReadValue(scanid);
+    //if (isNewScan == "Y")
+    //    updateScanReadValue(scanid);
 });
 
 $$(document).on('click', 'a[scan-type="history-category"]', function (e) {
@@ -583,10 +633,10 @@ $$(document).on('taphold', '.sharescan', function (e) {
             text: 'Open',
             color: 'teal',
             onClick: function () {
-                openPhotoBrowser(scanid);
+                openPhotoBrowser(scanid, isNewScan);
 
-                if (isNewScan == "Y")
-                    updateScanReadValue(scanid);
+                //if (isNewScan == "Y")
+                //    updateScanReadValue(scanid);
             }
         },
         {
@@ -622,3 +672,154 @@ $$(document).on('taphold', '.sharescan', function (e) {
     
     //myApp.alert("Sharing scan " + $$(this).attr("scanid") + "...");
 });
+
+$$('#registerBtn').on('click', function () {
+    var invalid = false;
+    var username = $$('#registerEmail').val().trim();
+    if (!validateEmail(username)) {
+        invalid = true;
+    }
+    var password = $$('#registerPassword').val();
+    var confirmPassword = $$('#registerPasswordConfirm').val();
+    if (password.length == 0 || password != confirmPassword) {
+        invalid = true;
+    }
+
+    var patientName = $$('#registerName').val();
+    if (patientName.length == 0) {
+        invalid = true;
+    }
+    var country = $$('#registerCountry').val();
+    var phone = $$('#registerMobile').val().trim();
+    
+    phone = phone.replace("+", "");
+    if (phone.startsWith("0")) {
+        phone = phone.replace(/^0+/, "");
+    }
+
+    if (phone.length < 10) {
+        invalid = true;
+    } else {
+        phone = country + phone;
+    }
+
+    var active = false;
+
+    if (invalid) {
+        myApp.alert("Invalid");
+    } else {
+        myApp.showPreloader();
+        register(username, password, patientName, phone);
+    }
+});
+
+function validateEmail(email) {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+
+
+$$('#activateBtn').on('click', function () {
+    var code = $$('#activateCode').val().trim();
+    myApp.showPreloader();
+    activate(code);
+});
+
+$$('#logoutBtn').on('click', function () {
+    logout();
+});
+
+function activate(code) {
+    var patientId = window.localStorage.getItem("sh-scan-id");
+    var obj = {
+        'patientid': patientId,
+        'code': code
+    }
+    $$.ajax({
+        type: "POST",
+        data: JSON.stringify(obj),
+        contentType: 'application/json',
+        url: getSecurityBasePath() + "activate",
+        timeout: 15000,
+        dataType: 'json',
+        cache: false,
+        success: function (data) {
+            if (data.code === 0) {
+                clearHistoryCategoryCache();
+                myApp.hidePreloader();
+                window.localStorage.setItem("sh-scan-activated", "true");
+                loginDevice();
+                console.log("active");
+                window.location.reload(true);
+            } else {
+                myApp.hidePreloader();
+                myApp.alert("fail");
+            }
+        },
+        error: function (xhr, status) {
+            myApp.hidePreloader();
+            console.log("Error during activation: " + xhr.responseText);
+        }
+    });
+}
+
+function register(username, password, patientName, phone) {
+    var deviceId = uuidv4();
+    var obj = {
+        'email': username,
+        'hash': password,
+        'name': patientName,
+        'phone': phone,
+        'active': false,
+        'registered': currentTimestamp = Math.floor(Date.now() / 1000) + '',
+        'deviceid': deviceId
+    };
+
+    $$.ajax({
+        type: "POST",
+        data: JSON.stringify(obj),
+        contentType: 'application/json',
+        url: getSecurityBasePath() + "register",
+        timeout: 15000,
+        dataType: 'json',
+        cache: false,
+        success: function (data) {
+            if (data.code === 0) {
+                myApp.hidePreloader();
+                window.localStorage.setItem("sh-scan-id", data.id);
+                window.localStorage.setItem("sh-scan-device-id", deviceId);
+                window.localStorage.setItem("sh-scan-activated", "false");
+                console.log("Patient: " + data.id);
+                console.log("Device: " + deviceId);
+                console.log("Activation Code: " + data.activationcode);
+
+                $$('#activateScreen').removeClass('hiddenItem');
+                $$('#loginScreen').addClass('hiddenItem');
+                window.location.reload(true);
+            } else {
+                myApp.hidePreloader();
+                myApp.alert("fail");
+            }
+        },
+        error: function (xhr, status) {
+            myApp.hidePreloader();
+            console.log("Error during registeration: " + xhr.responseText);
+        }
+    });
+}
+
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function logout() {
+    clearHistoryCategoryCache();
+    window.localStorage.removeItem("sh-scan-id");
+    window.localStorage.removeItem("sh-scan-device-id");
+    window.localStorage.removeItem("sh-scan-activated");
+    window.location.reload(true);
+}
+
