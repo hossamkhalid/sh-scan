@@ -1,6 +1,7 @@
 // Initialize app
 var myApp = new Framework7({
-    pushState: true
+    pushState: true,
+    tapHold: true //enable tap hold events
 });
 
 // If we need to use custom DOM library, let's save it to $$ variable:
@@ -97,21 +98,25 @@ function timestampToDateTime(timestamp) {
 
 ///////////////////////////Page Functions
 function loadIndexPage() {
-    $$.ajax({
-        type: "GET",
-        headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
-        data: "",
-        url: getApiBasePath() + "tempkeys",
-        timeout: 15000,
-        dataType: 'json',
-        cache: false,
-        success: function (data) {
-            osKey = data[0].keyvalue;
-        },
-        error: function (xhr, status) {
-            myApp.alert("Error Getting Keys: " + xhr.responseText);
-        }
-    });
+    if (osKey == null || osKey == "") {
+        $$.ajax({
+            type: "GET",
+            headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
+            data: "",
+            url: getApiBasePath() + "tempkeys",
+            timeout: 15000,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                osKey = data[0].keyvalue;
+                loadSettings();
+                loadHistoryCategory();
+            },
+            error: function (xhr, status) {
+                myApp.alert("Error Getting Keys: " + xhr.responseText);
+            }
+        });
+    } 
 
     $$.ajax({
         type: "GET",
@@ -123,6 +128,8 @@ function loadIndexPage() {
         cache: false,
         success: function (data) {
             $$('#new-scans-badge').text(data.count);
+            if (data.count > 0)
+                $$('new-scans-notification').html += '<span class="badge bg-red">' + data.count + '</span>';
         },
         error: function (xhr, status) {
             myApp.alert("Error New Scan Count: " + xhr.responseText);
@@ -131,6 +138,7 @@ function loadIndexPage() {
 }
 
 function loadNewScans() {
+    myApp.showPreloader();
     $$.ajax({
         type: "GET",
         headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
@@ -156,14 +164,17 @@ function loadNewScans() {
                 htmlObj += '</div></a></li>';
             }
             $$('#new-scans-list').html(htmlObj);
+            myApp.hidePreloader();
         },
         error: function (xhr, status) {
+            myApp.hidePreloader();
             myApp.alert("Error New Scans: " + xhr.responseText);
         }
     });
 }
 
 function loadHistory() {
+    myApp.showPreloader();
     $$.ajax({
         type: "GET",
         headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
@@ -177,65 +188,145 @@ function loadHistory() {
             for (var i = 0; i < data.length; i++) {
                 var folderHtml = '';
                 if (data[i].isnew == 'Y') {
-                    folderHtml = '<div class="item-media"><i class="f7-icons">folder_fill</i></div>';
+                    folderHtml = '<div class="item-media"><i class="f7-icons color-teal">folder_fill</i></div>';
                 } else {
-                    folderHtml = '<div class="item-media"><i class="f7-icons">folder</i></div>';
+                    folderHtml = '<div class="item-media"><i class="f7-icons color-teal">folder</i></div>';
                 }
                 htmlObj += '<li class="swipeout">';
                 //htmlObj += '<div class="swipeout-content item-content">';
-                htmlObj += '<a href="#" class="swipeout-content item-link item-content pb-page" scanid="' + data[i].id + '" isnewscan="' + data[i].isnew + '">';
+                htmlObj += '<a href="#" class="sharescan swipeout-content item-link item-content pb-page" scanid="' + data[i].id + '" isnewscan="' + data[i].isnew + '">';
                 htmlObj += folderHtml;
                 htmlObj += '<div class="item-inner">';
                 htmlObj += '<div class="item-title-row">';
-                htmlObj += '<div class="item-title">' + data[i].category + '</div>';
-                htmlObj += '<div class="item-after">' + timestampToDateTime(data[i].scandate) + '</div>';
+                htmlObj += '<div class="item-title">' + data[i].lab.name + '</div>';
+                //htmlObj += '<div class="item-after">' + timestampToDateTime(data[i].scandate) + '</div>';
                 htmlObj += '</div>';
-                htmlObj += '<div class="item-subtitle">' + data[i].lab.name + '</div>';
+                htmlObj += '<div class="item-subtitle">' + timestampToDateTime(data[i].scandate) + '</div>';
                 htmlObj += '</div>';
                 htmlObj += '</a>';
                 //htmlObj += '</div>';
-                htmlObj += '<div class="swipeout-actions-left"><a href="#" class="action1 bg-lightblue" linktype ="share" scanid="' + data[i].id + '"><i class="f7-icons">forward_fill</i></a></div>';
+                htmlObj += '<div class="swipeout-actions-left"><a href="#" class="action1 bg-teal" linktype ="share" scanid="' + data[i].id + '"><i class="f7-icons">forward_fill</i></a></div>';
                 htmlObj += '</li>';
             }
             $$('#history-scans-list').html(htmlObj);
+            $$('#history-navbar-title').html(scanValue);
+            myApp.hidePreloader();
         },
         error: function (xhr, status) {
+            myApp.hidePreloader();
             myApp.alert("Error History: " + xhr.responseText);
         }
     });
 }
 
-function loadHistoryCategory() { 
-    $$.ajax({
-        type: "GET",
-        headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
-        data: "",
-        url: getApiBasePath() + "scans?filter[where][patient]=" + getPatientId(),
-        timeout: 15000,
-        dataType: 'json',
-        cache: false,
-        success: function (data) {
+function loadHistoryCategory() {
+    myApp.showPreloader();
+
+    console.log("start");
+    var historyPageCache = window.localStorage.getItem("sh-scan-cache-history-category");
+    var historyPageCacheExpiry = window.localStorage.getItem("sh-scan-cache-history-category-expiry");
+
+    if (isCacheExpired(historyPageCacheExpiry)) {
+        console.log("cache expired - history category page");
+        $$.ajax({
+            type: "GET",
+            headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
+            data: "",
+            url: getApiBasePath() + "scans?filter[where][patient]=" + getPatientId(),
+            timeout: 15000,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                for (var i = 0; i < cats.length; i++) {
+                    $$('#history-category-' + cats[i]).text(0);
+                    $$('#history-category-new-' + cats[i]).text("folder");
+                }
+
+                window.localStorage.setItem("sh-scan-cache-history-category", JSON.stringify(data));
+                window.localStorage.setItem("sh-scan-cache-history-category-expiry", getNewExpiry() + "");
+
+                for (var i = 0; i < data.length; i++) {
+                    var count = $$('#history-category-' + data[i].category).text();
+                    count++;
+                    $$('#history-category-' + data[i].category).text(count);
+
+                    if (data[i].isnew == "Y") {
+                        var icon = $$('#history-category-new-' + data[i].category).text();
+                        icon += "_fill";
+                        $$('#history-category-new-' + data[i].category).text(icon);
+                    }
+                }
+                myApp.hidePreloader();
+            },
+            error: function (xhr, status) {
+                myApp.hidePreloader();
+                myApp.alert("Error History Category: " + xhr.responseText);
+            }
+        });
+    } else {
+        console.log("cache not expired - history category page");
+        if (historyPageCache == null || historyPageCache == "") {
+            console.log("No valid cache - history category page");
+
+            $$.ajax({
+                type: "GET",
+                headers: { "X-IBM-Client-Id": getClientId(), "X-IBM-Client-Secret": getClientSecret() },
+                data: "",
+                url: getApiBasePath() + "scans?filter[where][patient]=" + getPatientId(),
+                timeout: 15000,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    for (var i = 0; i < cats.length; i++) {
+                        $$('#history-category-' + cats[i]).text(0);
+                        $$('#history-category-new-' + cats[i]).text("folder");
+                    }
+
+                    window.localStorage.setItem("sh-scan-cache-history-category", JSON.stringify(data));
+                    window.localStorage.setItem("sh-scan-cache-history-category-expiry", getNewExpiry() + "");
+
+                    for (var i = 0; i < data.length; i++) {
+                        var count = $$('#history-category-' + data[i].category).text();
+                        count++;
+                        $$('#history-category-' + data[i].category).text(count);
+
+                        if (data[i].isnew == "Y") {
+                            var icon = $$('#history-category-new-' + data[i].category).text();
+                            icon += "_fill";
+                            $$('#history-category-new-' + data[i].category).text(icon);
+                        }
+                    }
+                    myApp.hidePreloader();
+                },
+                error: function (xhr, status) {
+                    myApp.hidePreloader();
+                    myApp.alert("Error History Category: " + xhr.responseText);
+                }
+            });
+            
+        } else {
+            console.log("cache valid - history category page");
             for (var i = 0; i < cats.length; i++) {
                 $$('#history-category-' + cats[i]).text(0);
                 $$('#history-category-new-' + cats[i]).text("folder");
             }
 
-            for (var i = 0; i < data.length; i++) {
-                var count = $$('#history-category-' + data[i].category).text();
-                count++;
-                $$('#history-category-' + data[i].category).text(count);
+            var cache = JSON.parse(window.localStorage.getItem("sh-scan-cache-history-category"));
 
-                if (data[i].isnew == "Y") {
-                    var icon = $$('#history-category-new-' + data[i].category).text();
+            for (var i = 0; i < cache.length; i++) {
+                var count = $$('#history-category-' + cache[i].category).text();
+                count++;
+                $$('#history-category-' + cache[i].category).text(count);
+                if (cache[i].isnew == "Y") {
+                    var icon = $$('#history-category-new-' + cache[i].category).text();
                     icon += "_fill";
-                    $$('#history-category-new-' + data[i].category).text(icon);
+                    $$('#history-category-new-' + cache[i].category).text(icon);
                 }
             }
-        },
-        error: function (xhr, status) {
-            myApp.alert("Error History Category: " + xhr.responseText);
+            myApp.hidePreloader();
         }
-    });
+    }
+    
 }
 
 function openPhotoBrowser(scanid) {
@@ -259,13 +350,14 @@ function openPhotoBrowser(scanid) {
                 type: 'page',
                 lazyLoading: true,
                 lazyLoadingOnTransitionStart: true,
-                backLinkText: 'Back'
+                navbar: false,
+                toolbar: false,
+                exposition: false
             });
 
             updateScanReadValue(scanid);
 
             myPhotoBrowserPage.open();
-
         },
         error: function (xhr, status) {
             myApp.alert("Error Image Viewer: " + xhr.responseText);
@@ -294,6 +386,7 @@ function updateScanReadValue(scanid) {
 }
 
 function login(username, password) {
+    myApp.showPreloader();
     var obj = { 'email': username, 'hash': password };
     $$.ajax({
         type: "POST",
@@ -304,24 +397,36 @@ function login(username, password) {
         dataType: 'json',
         cache: false,
         success: function (data) {
-            if (data.code === 0) {
+            if (data.code == 0) {
+                
                 ibmClientId = data.key;
+                console.log(ibmClientId);
                 ibmClientSecret = data.secret;
+                console.log(ibmClientSecret);
                 patientId = data.patientid;
+                console.log(patientId);
+                window.localStorage.setItem("sh-scan-id", patientId);
+                console.log(window.localStorage.getItem("sh-scan-id"));
                 loadIndexPage();
-                myApp.closeModal('.login-screen');
+                myApp.closeModal('.login-screen');                
+                
+                myApp.hidePreloader();
             } else {
+                myApp.hidePreloader();
                 myApp.alert("Invalid credentials");
             }
         },
         error: function (xhr, status) {
-            myApp.alert("Error during login: " + xhr.responseText);
+            myApp.hidePreloader();
+            myApp.alert("Error during login: " + xhr.status);
         }
     });
 }
 
 function loginDevice(deviceid) {
-    var obj = { 'deviceid': deviceid };
+
+    var obj = { 'deviceid': window.localStorage.getItem("sh-scan-id") };
+
     $$.ajax({
         type: "POST",
         data: JSON.stringify(obj),
@@ -335,15 +440,51 @@ function loginDevice(deviceid) {
                 ibmClientId = data.key;
                 ibmClientSecret = data.secret;
                 patientId = data.patientid;
+                window.localStorage.setItem("sh-scan-id", patientId);
                 loadIndexPage();
+                myApp.hidePreloader();
             } else {
+                myApp.hidePreloader();
                 myApp.loginScreen();
             }
         },
         error: function (xhr, status) {
+            myApp.hidePreloader();
             myApp.alert("Error during login: " + xhr.responseText);
+            console.log("Error during login: " + xhr.status);
         }
     });
+}
+
+function loadSettings() {
+    var lang = window.localStorage.getItem("sh-scan-lang");
+    if(lang == null || lang == "") {
+        window.localStorage.setItem("sh-scan-lang", "en");  
+    }
+    var lang = window.localStorage.getItem("sh-scan-lang");
+    $$("#settings-lang-input-" + lang).prop('checked', true);
+    if (lang == "ar") {
+        $$("head").append('<link id="css-rtl-support" rel="stylesheet" href="lib/framework7/css/framework7.ios.rtl.min.css">');
+    }
+}
+
+function isCacheExpired(timestamp) {
+    if (timestamp == null || timestamp == "") {
+        return true;
+    }
+
+    var current = Math.floor(Date.now() / 1000);
+    current += 300;
+    if (timestamp < current) {
+        return false;
+    }
+    return true;
+}
+
+function getNewExpiry() {
+    var current = Math.floor(Date.now() / 1000);
+    current += 300;
+    return current;
 }
 
 $$('.login-screen .list-button').on('click', function () {
@@ -354,6 +495,7 @@ $$('.login-screen .list-button').on('click', function () {
 
 // Handle Cordova Device Events
 $$(document).on('deviceready', function () {
+    myApp.showPreloader();
     loginDevice(device.uuid);
     //loadIndexPage();
     //myApp.alert("No Wait");
@@ -404,5 +546,79 @@ $$(document).on('click', 'a[scan-type="history-category"]', function (e) {
 });
 
 $$(document).on('click', 'a[linktype="share"]', function (e) {
-    myApp.alert("Sharing scan " + $$(this).attr("scanid") + "...");
+    console.log("Contacts: " + navigator.contacts.length);
+    navigator.contacts.pickContact(function (contact) {
+        var name = contact.displayName;
+        console.log('The following contact has been selected:' + name);
+        myApp.alert("Sharing scan with "+name);
+    }, function (err) {
+        console.log('Error: ' + err);
+    });
+    //myApp.alert("Sharing scan " + $$(this).attr("scanid") + "...");
+});
+
+$$(document).on('click', 'a[id="sidenav-home"]', function (e) {
+    console.log($$("head"));
+    $$("head").append('<link rel="stylesheet" href="lib/framework7/css/framework7.ios.rtl.min.css">');
+});
+
+$$(document).on('click', 'div[id="settings-lang-ar"]', function (e) {
+    console.log("ar");
+    window.localStorage.setItem("sh-scan-lang", "ar");
+    window.location.reload(true);
+});
+
+$$(document).on('click', 'div[id="settings-lang-en"]', function (e) {
+    console.log("en");
+    window.localStorage.setItem("sh-scan-lang", "en");
+    window.location.reload(true);
+});
+
+$$(document).on('taphold', '.sharescan', function (e) {
+    var scanid = $$(this).attr("scanid");
+    var isNewScan = $$(this).attr("isnewscan");
+    
+    var buttons = [
+        {
+            text: 'Open',
+            color: 'teal',
+            onClick: function () {
+                openPhotoBrowser(scanid);
+
+                if (isNewScan == "Y")
+                    updateScanReadValue(scanid);
+            }
+        },
+        {
+            text: 'Share',
+            color: 'teal',
+            onClick: function () {
+                console.log("Contacts: " + navigator.contacts.length);
+                navigator.contacts.pickContact(function (contact) {
+                    var name = contact.displayName;
+                    console.log('The following contact has been selected:' + name);
+                    myApp.alert("Sharing scan with " + name);
+                }, function (err) {
+                    console.log('Error: ' + err);
+                });
+            }
+        },
+        {
+            text: 'More Information',
+            color: 'teal',
+            onClick: function () {
+                
+            }
+        },
+        {
+            text: 'Cancel',
+            color: 'red',
+            onClick: function () {
+                
+            }
+        },
+    ];
+    myApp.actions(buttons);
+    
+    //myApp.alert("Sharing scan " + $$(this).attr("scanid") + "...");
 });

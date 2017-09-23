@@ -1,15 +1,6 @@
 ﻿<!DOCTYPE html>
 <html>
-<head>
-    <!--
-        Customize this policy to fit your own app's needs. For more guidance, see:
-            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
-        Some notes:
-            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-                * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
+<head id="headerElement">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
 
     <!-- Required meta tags-->
@@ -23,12 +14,9 @@
     <!-- Your app title -->
     <title>My App</title>
 
-    <!-- This template defaults to the iOS CSS theme. To support both iOS and material design themes, see the Framework7 Tutorial at the link below:
-        http://www.idangero.us/framework7/tutorials/maintain-both-ios-and-material-themes-in-single-app.html
-     -->
+    <link rel="stylesheet" href="lib/framework7/css/framework7.ios.css">
 
-    <link rel="stylesheet" href="lib/framework7/css/framework7.ios.min.css">
-    <link rel="stylesheet" href="lib/framework7/css/framework7.ios.colors.min.css">
+    <link rel="stylesheet" href="lib/framework7/css/framework7.material.colors.min.css">
 
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/framework7-icons.css">
@@ -85,16 +73,62 @@
     </style>
 </head>
 
-<body>
+<body class="theme-dark">
     <!-- Status bar overlay for full screen mode (PhoneGap) -->
     <div class="statusbar-overlay"></div>
 
     <!-- Panels overlay-->
     <div class="panel-overlay"></div>
     <!-- Left panel with reveal effect-->
-    <div class="panel panel-left panel-reveal">
-        <div class="content-block">
-            <p>Left panel content goes here</p>
+    <div class="panel panel-left panel-reveal layout-dark">
+        <div class="content-block-title">Settings</div>
+        <div class="list-block accordion-list">
+            <ul>
+                <li class="accordion-item ">
+                    <a href="#" class="item-content item-link bg-gray">
+                        <div class="item-inner">
+                            <div class="item-title">Language</div>
+                        </div>
+                    </a>
+                    <div class="accordion-item-content">
+                        <div class="content-block">
+                            <ul>
+                                <!-- Single radio input -->
+                                <li>
+                                    <label class="label-radio item-content">
+                                        <!-- Checked by default -->
+                                        <input type="radio" name="my-radio" value="en" id="settings-lang-input-en">
+                                        <div class="item-inner" id="settings-lang-en">
+                                            <div class="item-title">English</div>
+                                        </div>
+                                    </label>
+                                </li>
+                                <!-- Another radio input -->
+                                <li>
+                                    <label class="label-radio item-content">
+                                        <input type="radio" name="my-radio" value="ar" id="settings-lang-input-ar">
+                                        <div class="item-inner" id="settings-lang-ar">
+                                            <div class="item-title">العربية</div>
+                                        </div>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li class="accordion-item">
+                    <a href="#" class="item-content item-link bg-gray">
+                        <div class="item-inner">
+                            <div class="item-title">Item 2</div>
+                        </div>
+                    </a>
+                    <div class="accordion-item-content">
+                        <div class="content-block">
+                            <p>Item 2 content. Lorem ipsum dolor sit amet...</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 
@@ -105,56 +139,112 @@
             <!-- Top Navbar-->
             <div class="navbar">
                 <div data-page="index" class="navbar-inner">
-                    <!-- We need cool sliding animation on title element, so we have additional "sliding" class -->
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="icon f7-icons color-teal">gear</i></a>
+                    </div>
                     <div class="center sliding">SH SCAN</div>
                     <div class="right">
-                        <!--
-                      Right link contains only icon - additional "icon-only" class
-                      Additional "open-panel" class tells app to open panel when we click on this link
-                    -->
-                        <a href="#" class="link icon-only open-panel"><i class="icon icon-bars"></i></a>
+                        <a href="#" class="link icon-only"><i class="icon f7-icons color-teal">bell</i></a>
                     </div>
                 </div>
                 <div data-page="new-scans" class="navbar-inner cached">
-                    <div class="left sliding"><a href="#" class="back link"> <i class="icon icon-back"></i><span>Back</span></a></div>
+                    <div class="left sliding"><a href="#" class="back link color-teal"> <i class="icon icon-back color-teal"></i><span>Back</span></a></div>
                     <div class="center sliding">New Scans</div>
                 </div>
                 <div data-page="history" class="navbar-inner cached">
-                    <div class="left sliding"><a href="#" class="back link"> <i class="icon icon-back"></i><span>Back</span></a></div>
-                    <div class="center sliding">History</div>
-                </div>
-                <div data-page="history-category" class="navbar-inner cached">
-                    <div class="left sliding"><a href="#" class="back link"> <i class="icon icon-back"></i><span>Back</span></a></div>
-                    <div class="center sliding">History</div>
-                </div>
-                <div data-page="imgpage" class="navbar-inner cached">
-                    <div class="left sliding"><a href="#" class="back link"> <i class="icon icon-back"></i><span>Back</span></a></div>
-                    <div class="center sliding">image-page</div>
+                    <div class="left sliding"><a href="#" class="back link color-teal"> <i class="icon icon-back color-teal"></i><span>Back</span></a></div>
+                    <div class="center sliding" id="history-navbar-title">History</div>
+                    <div class="right">
+                        <a href="#" class="link icon-only"><i class="icon f7-icons color-teal">bell</i></a>
+                    </div>
                 </div>
             </div>
+            
             <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
-            <div class="pages navbar-through toolbar-through">
+            <div class="pages navbar-through">
                 <!-- Page, "data-page" contains page name -->
                 <div data-page="index" class="page">
-                    <!-- Scrollable page content -->
                     <div class="page-content">
                         <div class="list-block inset">
-                            <ul>
+                            <ul id="history-category-scans-list">
                                 <li>
-                                    <a href="#new-scans" class="item-link item-content">
-                                        <div class="item-media"><i class="f7-icons">drawer_fill</i></div>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="CT">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-CT">folder</i></div>
                                         <div class="item-inner">
-                                            <div class="item-title">New Scans</div>
-                                            <div class="item-after"><span class="badge" id="new-scans-badge">0</span></div>
+                                            <div class="item-title">CT</div>
+                                            <div class="item-after"><span class="badge" id="history-category-CT">0</span></div>
                                         </div>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#history-category" class="item-link item-content">
-                                        <div class="item-media"><i class="f7-icons">drawers</i></div>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="ECG">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-ECG">folder</i></div>
                                         <div class="item-inner">
-                                            <div class="item-title">History</div>
-                                            <div class="item-after"></div>
+                                            <div class="item-title">ECG</div>
+                                            <div class="item-after"><span class="badge" id="history-category-ECG">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="ECHO">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-ECHO">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">ECHO</div>
+                                            <div class="item-after"><span class="badge" id="history-category-ECHO">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MRI">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-MRI">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">MRI</div>
+                                            <div class="item-after"><span class="badge" id="history-category-MRI">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MULTI-SLICE">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-MULTI-SLICE">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">MULTI-SLICE</div>
+                                            <div class="item-after"><span class="badge" id="history-category-MULTI-SLICE">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="PET">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-PET">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">PET</div>
+                                            <div class="item-after"><span class="badge" id="history-category-PET">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="SONAR">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-SONAR">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">SONAR</div>
+                                            <div class="item-after"><span class="badge" id="history-category-SONAR">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="TOPOGRAPHY">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-TOPOGRAPHY">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">TOPOGRAPHY</div>
+                                            <div class="item-after"><span class="badge" id="history-category-TOPOGRAPHY">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="X-RAY">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-X-RAY">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">X-RAY</div>
+                                            <div class="item-after"><span class="badge" id="history-category-X-RAY">0</span></div>
                                         </div>
                                     </a>
                                 </li>
@@ -163,7 +253,7 @@
                     </div>
                 </div>
                 <!-- New Scans page -->
-                <div class="page cached" data-page="new-scans">
+                <div class="page cached navbar-inner" data-page="new-scans">
                     <div class="page-content">
                         <div class="list-block media-list inset">
                             <ul id="new-scans-list">
@@ -194,30 +284,39 @@
                     <div class="page-content">
                         <div class="list-block media-list inset">
                             <ul id="history-scans-list">
-                                <li>
+                                <li class="swipeout">
                                     <a href="#" class="item-link item-content pb-page">
-                                        <div class="item-media"><i class="f7-icons">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons color-teal">folder_fill</i></div>
                                         <div class="item-inner">
-                                            <div class="item-title">MRI 03/09/2017</div>
-                                            <div class="item-after"><span class="badge">10</span></div>
+                                            <div class="item-title-row">
+                                                <div class="item-title">MRI</div>
+                                                <div class="item-after">11/11/111111</div>
+                                            </div>
+                                            <div class="item-subtitle">Lab Test</div>
                                         </div>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="swipeout">
                                     <a href="#" class="item-link item-content pb-page">
-                                        <div class="item-media"><i class="f7-icons">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons color-teal">folder_fill</i></div>
                                         <div class="item-inner">
-                                            <div class="item-title">CAT 02/09/2017</div>
-                                            <div class="item-after"><span class="badge">10</span></div>
+                                            <div class="item-title-row">
+                                                <div class="item-title">MRI</div>
+                                                <div class="item-after">11/11/111111</div>
+                                            </div>
+                                            <div class="item-subtitle">Lab Test</div>
                                         </div>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="swipeout">
                                     <a href="#" class="item-link item-content pb-page">
-                                        <div class="item-media"><i class="f7-icons">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons color-teal">folder_fill</i></div>
                                         <div class="item-inner">
-                                            <div class="item-title">MRI 01/09/2017</div>
-                                            <div class="item-after"><span class="badge">10</span></div>
+                                            <div class="item-title-row">
+                                                <div class="item-title">MRI</div>
+                                                <div class="item-after">11/11/111111</div>
+                                            </div>
+                                            <div class="item-subtitle">Lab Test</div>
                                         </div>
                                     </a>
                                 </li>
@@ -226,13 +325,13 @@
                     </div>
                 </div>
                 <!-- History Category page -->
-                <div class="page cached" data-page="history-category">
+                <div class="page cached navbar-inner" data-page="history-category">
                     <div class="page-content">
                         <div class="list-block inset">
                             <ul id="history-category-scans-list">
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="CT">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-CT">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-CT">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">CT</div>
                                             <div class="item-after"><span class="badge" id="history-category-CT">0</span></div>
@@ -241,7 +340,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="ECG">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-ECG">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-ECG">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">ECG</div>
                                             <div class="item-after"><span class="badge" id="history-category-ECG">0</span></div>
@@ -250,7 +349,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="ECHO">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-ECHO">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-ECHO">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">ECHO</div>
                                             <div class="item-after"><span class="badge" id="history-category-ECHO">0</span></div>
@@ -259,7 +358,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MRI">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-MRI">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-MRI">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">MRI</div>
                                             <div class="item-after"><span class="badge" id="history-category-MRI">0</span></div>
@@ -268,7 +367,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MULTI-SLICE">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-MULTI-SLICE">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-MULTI-SLICE">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">MULTI-SLICE</div>
                                             <div class="item-after"><span class="badge" id="history-category-MULTI-SLICE">0</span></div>
@@ -277,7 +376,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="PET">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-PET">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-PET">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">PET</div>
                                             <div class="item-after"><span class="badge" id="history-category-PET">0</span></div>
@@ -286,7 +385,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="SONAR">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-SONAR">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-SONAR">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">SONAR</div>
                                             <div class="item-after"><span class="badge" id="history-category-SONAR">0</span></div>
@@ -295,7 +394,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="TOPOGRAPHY">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-TOPOGRAPHY">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-TOPOGRAPHY">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">TOPOGRAPHY</div>
                                             <div class="item-after"><span class="badge" id="history-category-TOPOGRAPHY">0</span></div>
@@ -304,7 +403,7 @@
                                 </li>
                                 <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="X-RAY">
-                                        <div class="item-media"><i class="f7-icons" id="history-category-new-X-RAY">folder</i></div>
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-X-RAY">folder</i></div>
                                         <div class="item-inner">
                                             <div class="item-title">X-RAY</div>
                                             <div class="item-after"><span class="badge" id="history-category-X-RAY">0</span></div>
@@ -317,14 +416,7 @@
                 </div>
             </div>
             <!-- Bottom Toolbar-->
-            <div class="toolbar">
-                <div class="toolbar-inner">
-                    <!-- Toolbar links 
-                    <a href="#" class="link">Link 1</a>
-                    <a href="#" class="link">Link 2</a>
-                    -->
-                </div>
-            </div>
+            
         </div>
     </div>
 
@@ -332,37 +424,109 @@
         <div class="view">
             <div class="page">
                 <div class="page-content login-screen-content">
-                    <div class="login-screen-title">My App</div>
-                    <form>
-                        <div class="list-block">
-                            <ul>
-                                <li class="item-content">
-                                    <div class="item-inner">
-                                        <div class="item-title label">Username</div>
-                                        <div class="item-input">
-                                            <input type="text" name="username" placeholder="Your username">
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="item-content">
-                                    <div class="item-inner">
-                                        <div class="item-title label">Password</div>
-                                        <div class="item-input">
-                                            <input type="password" name="password" placeholder="Your password">
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
+                    <div class="login-screen-title">SH SCANNER</div>
+                    <div class="content-block">
+                        <!-- Buttons row as tabs controller -->
+                        <div class="buttons-row">
+                            <!-- Link to 1st tab, active -->
+                            <a href="#tabLogin" class="tab-link active button">Sign In</a>
+                            <!-- Link to 2nd tab -->
+                            <a href="#tabRegister" class="tab-link button">Register</a>
                         </div>
-                        <div class="list-block">
-                            <ul>
-                                <li><a href="#" class="item-link list-button" id="loginBtn">Sign In</a></li>
-                            </ul>
-                            <div class="list-block-label">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
+                    <div class="tabs">
+                        <!-- Tab 1, active by default -->
+                        <div id="tabLogin" class="tab active">
+                            <form>
+                                <div class="list-block">
+                                    <ul>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Email</div>
+                                                <div class="item-input">
+                                                    <input type="text" name="username" placeholder="Your email">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Password</div>
+                                                <div class="item-input">
+                                                    <input type="password" name="password" placeholder="Your password">
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="list-block">
+                                    <ul>
+                                        <li><a href="#" class="item-link list-button" id="loginBtn">Sign In</a></li>
+                                    </ul>
+                                    <div class="list-block-label">
+                                        <p></p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- Tab 2 -->
+                        <div id="tabRegister" class="tab">
+                            <form>
+                                <div class="list-block">
+                                    <ul>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Email</div>
+                                                <div class="item-input">
+                                                    <input type="text" name="username" placeholder="Your email">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Mobile</div>
+                                                <div class="item-input">
+                                                    <input type="text" name="username" placeholder="Your mobile">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Password</div>
+                                                <div class="item-input">
+                                                    <input type="password" name="password" placeholder="Your password">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Confirm Password</div>
+                                                <div class="item-input">
+                                                    <input type="password" name="password" placeholder="Confirm password">
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="list-block">
+                                    <ul>
+                                        <li><a href="#" class="item-link list-button" id="loginBtn">Register</a></li>
+                                    </ul>
+                                    <div class="list-block-label">
+                                        <p></p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- Tab 3 -->
+                        <div id="tab3" class="tab">
+                            <div class="content-block">
+                                <p>This is tab 3 content</p>
+                                ...
                             </div>
                         </div>
-                    </form>
+                    </div>
+
+
                 </div>
             </div>
         </div>
