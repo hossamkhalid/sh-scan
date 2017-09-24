@@ -15,7 +15,7 @@
     <title>My App</title>
 
     <link rel="stylesheet" href="lib/framework7/css/framework7.ios.css">
-
+    <link rel="stylesheet" href="lib/framework7/css/framework7.ios.colors.min.css">
     <link rel="stylesheet" href="lib/framework7/css/framework7.material.colors.min.css">
 
     <link rel="stylesheet" href="css/styles.css">
@@ -70,6 +70,10 @@
             display: table;
             clear: both;
         }
+
+        .hiddenItem {
+            display: none;
+        }
     </style>
 </head>
 
@@ -86,6 +90,7 @@
             <ul>
                 <li class="accordion-item ">
                     <a href="#" class="item-content item-link bg-gray">
+                        <div class="item-media"><i class="f7-icons">info</i></div>
                         <div class="item-inner">
                             <div class="item-title">Language</div>
                         </div>
@@ -118,13 +123,17 @@
                 </li>
                 <li class="accordion-item">
                     <a href="#" class="item-content item-link bg-gray">
+                        <div class="item-media"><i class="f7-icons">logout</i></div>
                         <div class="item-inner">
-                            <div class="item-title">Item 2</div>
+                            <div class="item-title">Logout</div>
                         </div>
                     </a>
                     <div class="accordion-item-content">
                         <div class="content-block">
-                            <p>Item 2 content. Lorem ipsum dolor sit amet...</p>
+                            <p>Are you sure you want to logout?</p>
+                            <p>
+                                <a href="#" id="logoutBtn" class="button button-fill button-big color-red">Logout</a>
+                            </p>
                         </div>
                     </div>
                 </li>
@@ -140,11 +149,11 @@
             <div class="navbar">
                 <div data-page="index" class="navbar-inner">
                     <div class="left">
-                        <a href="#" class="link icon-only open-panel"><i class="icon f7-icons color-teal">gear</i></a>
+                        <a href="#" class="link icon-only open-panel"><i class="icon f7-icons color-teal"">gear</i></a>
                     </div>
                     <div class="center sliding">SH SCAN</div>
                     <div class="right">
-                        <a href="#" class="link icon-only"><i class="icon f7-icons color-teal">bell</i></a>
+                        <a href="#" class="link icon-only"><i class="icon f7-icons color-teal" name="new-scans-notification">bell</i></a>
                     </div>
                 </div>
                 <div data-page="new-scans" class="navbar-inner cached">
@@ -155,8 +164,21 @@
                     <div class="left sliding"><a href="#" class="back link color-teal"> <i class="icon icon-back color-teal"></i><span>Back</span></a></div>
                     <div class="center sliding" id="history-navbar-title">History</div>
                     <div class="right">
-                        <a href="#" class="link icon-only"><i class="icon f7-icons color-teal">bell</i></a>
+                        <a href="#" class="link icon-only"><i class="icon f7-icons color-teal" name="new-scans-notification">bell</i></a>
                     </div>
+                </div>
+            </div>
+
+            <div class="toolbar tabbar tabbar-labels">
+                <div class="toolbar-inner">
+                    <a href="#" class="tab-link bg-teal">
+                        <i class="icon f7-icons color-white">person</i>
+                        <span class="tabbar-label color-white">Patient</span>
+                    </a>
+                    <a href="#" class="tab-link">
+                        <i class="icon f7-icons color-teal">person</i>
+                        <span class="tabbar-label">Consultant</span>
+                    </a>
                 </div>
             </div>
             
@@ -195,6 +217,33 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="EYE-SONAR">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-EYE-SONAR">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">EYE-SONAR</div>
+                                            <div class="item-after"><span class="badge" id="history-category-EYE-SONAR">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="FIELD-OF-VISION">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-FIELD-OF-VISION">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">FIELD-OF-VISION</div>
+                                            <div class="item-after"><span class="badge" id="history-category-FIELD-OF-VISION">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="FLUORESCEIN-ANGIO">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-FLUORESCEIN-ANGIO">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">FLUORESCEIN-ANGIO</div>
+                                            <div class="item-after"><span class="badge" id="history-category-FLUORESCEIN-ANGIO">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MRI">
                                         <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-MRI">folder</i></div>
                                         <div class="item-inner">
@@ -209,6 +258,24 @@
                                         <div class="item-inner">
                                             <div class="item-title">MULTI-SLICE</div>
                                             <div class="item-after"><span class="badge" id="history-category-MULTI-SLICE">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="OCT">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-OCT">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">OCT</div>
+                                            <div class="item-after"><span class="badge" id="history-category-OCT">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="PENTACAM">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-PENTACAM">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">PENTACAM</div>
+                                            <div class="item-after"><span class="badge" id="history-category-PENTACAM">0</span></div>
                                         </div>
                                     </a>
                                 </li>
@@ -249,6 +316,8 @@
                                     </a>
                                 </li>
                             </ul>
+                            <br />
+                            <br />
                         </div>
                     </div>
                 </div>
@@ -357,6 +426,33 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="EYE-SONAR">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-EYE-SONAR">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">EYE-SONAR</div>
+                                            <div class="item-after"><span class="badge" id="history-category-EYE-SONAR">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="FIELD-OF-VISION">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-FIELD-OF-VISION">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">FIELD-OF-VISION</div>
+                                            <div class="item-after"><span class="badge" id="history-category-FIELD-OF-VISION">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="FLUORESCEIN-ANGIO">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-FLUORESCEIN-ANGIO">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">FLUORESCEIN-ANGIO</div>
+                                            <div class="item-after"><span class="badge" id="history-category-FLUORESCEIN-ANGIO">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="MRI">
                                         <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-MRI">folder</i></div>
                                         <div class="item-inner">
@@ -371,6 +467,24 @@
                                         <div class="item-inner">
                                             <div class="item-title">MULTI-SLICE</div>
                                             <div class="item-after"><span class="badge" id="history-category-MULTI-SLICE">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="OCT">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-OCT">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">OCT</div>
+                                            <div class="item-after"><span class="badge" id="history-category-OCT">0</span></div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#history" class="item-link item-content" scan-type="history-category" scan-value="PENTACAM">
+                                        <div class="item-media"><i class="f7-icons  color-teal" id="history-category-new-PENTACAM">folder</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title">PENTACAM</div>
+                                            <div class="item-after"><span class="badge" id="history-category-PENTACAM">0</span></div>
                                         </div>
                                     </a>
                                 </li>
@@ -423,11 +537,11 @@
     <div class="login-screen">
         <div class="view">
             <div class="page">
-                <div class="page-content login-screen-content">
+                <div class="page-content login-screen-content" id="loginScreen">
                     <div class="login-screen-title">SH SCANNER</div>
                     <div class="content-block">
                         <!-- Buttons row as tabs controller -->
-                        <div class="buttons-row">
+                        <div class="buttons-row theme-gray">
                             <!-- Link to 1st tab, active -->
                             <a href="#tabLogin" class="tab-link active button">Sign In</a>
                             <!-- Link to 2nd tab -->
@@ -444,7 +558,7 @@
                                             <div class="item-inner">
                                                 <div class="item-title label">Email</div>
                                                 <div class="item-input">
-                                                    <input type="text" name="username" placeholder="Your email">
+                                                    <input type="email" name="username" placeholder="Your email" id="loginEmail">
                                                 </div>
                                             </div>
                                         </li>
@@ -452,7 +566,7 @@
                                             <div class="item-inner">
                                                 <div class="item-title label">Password</div>
                                                 <div class="item-input">
-                                                    <input type="password" name="password" placeholder="Your password">
+                                                    <input type="password" name="password" placeholder="Your password" id="loginPassword">
                                                 </div>
                                             </div>
                                         </li>
@@ -460,11 +574,14 @@
                                 </div>
                                 <div class="list-block">
                                     <ul>
-                                        <li><a href="#" class="item-link list-button" id="loginBtn">Sign In</a></li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-input">
+                                                    <a href="#" class="button button-big button-fill button-raised color-teal" id="loginBtn">Sign In</a>
+                                                </div>
+                                            </div>
+                                        </li>
                                     </ul>
-                                    <div class="list-block-label">
-                                        <p></p>
-                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -475,9 +592,28 @@
                                     <ul>
                                         <li class="item-content">
                                             <div class="item-inner">
+                                                <div class="item-title label">Full Name</div>
+                                                <div class="item-input">
+                                                    <input type="text" name="username" placeholder="Your name" id="registerName">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
                                                 <div class="item-title label">Email</div>
                                                 <div class="item-input">
-                                                    <input type="text" name="username" placeholder="Your email">
+                                                    <input type="email" name="username" placeholder="Your email" id="registerEmail">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Country</div>
+                                                <div class="item-input">
+                                                    <select id="registerCountry">
+                                                        <option value="+20">Egypt(+20)</option>
+                                                        <option value="+44">UK(+44)</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </li>
@@ -485,23 +621,23 @@
                                             <div class="item-inner">
                                                 <div class="item-title label">Mobile</div>
                                                 <div class="item-input">
-                                                    <input type="text" name="username" placeholder="Your mobile">
-                                                </div>
+                                                    <input type="tel" name="username" placeholder="Your mobile" id="registerMobile">
+                                                </div>                                                 
                                             </div>
                                         </li>
                                         <li class="item-content">
                                             <div class="item-inner">
                                                 <div class="item-title label">Password</div>
                                                 <div class="item-input">
-                                                    <input type="password" name="password" placeholder="Your password">
+                                                    <input type="password" name="password" placeholder="Your password" id="registerPassword">
                                                 </div>
                                             </div>
                                         </li>
                                         <li class="item-content">
                                             <div class="item-inner">
-                                                <div class="item-title label">Confirm Password</div>
+                                                <div class="item-title label">Confirm</div>
                                                 <div class="item-input">
-                                                    <input type="password" name="password" placeholder="Confirm password">
+                                                    <input type="password" name="password" placeholder="Confirm password" id="registerPasswordConfirm">
                                                 </div>
                                             </div>
                                         </li>
@@ -509,7 +645,13 @@
                                 </div>
                                 <div class="list-block">
                                     <ul>
-                                        <li><a href="#" class="item-link list-button" id="loginBtn">Register</a></li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-input">
+                                                    <a href="#" class="button button-big button-fill button-raised color-teal" id="registerBtn">Register</a>
+                                                </div>
+                                            </div>
+                                        </li>
                                     </ul>
                                     <div class="list-block-label">
                                         <p></p>
@@ -527,6 +669,49 @@
                     </div>
 
 
+                </div>
+                <div class="page-content login-screen-content hiddenItem" id="activateScreen">
+                    <div class="login-screen-title">SH SCANNER</div>
+                    <div class="content-block">
+                        <!-- Buttons row as tabs controller -->
+                        <div class="buttons-row">
+                            <!-- Link to 1st tab, active -->
+                            <a href="#tabActivate" class="tab-link active button">Activate</a>
+                        </div>
+                    </div>
+                    <div class="tabs">
+                        <!-- Tab 1, active by default -->
+                        <div id="tabActivate" class="tab active">
+                            <form>
+                                <div class="list-block">
+                                    <ul>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Code</div>
+                                                <div class="item-input">
+                                                    <input type="text" name="username" placeholder="Your code" id="activateCode">
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="list-block">
+                                    <ul>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-input">
+                                                    <a href="#" class="button button-big button-fill button-raised color-teal" id="activateBtn">Activate</a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div class="list-block-label">
+                                        <p></p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

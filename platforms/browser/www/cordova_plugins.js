@@ -124,7 +124,8 @@ module.exports.metadata =
     "cordova-plugin-device": "1.1.6",
     "com.dbaq.cordova.contactsPhoneNumbers": "0.0.9",
     "cordova-plugin-contacts": "2.3.1",
-    "cordova-plugin-compat": "1.0.0"
+    "cordova-plugin-compat": "1.0.0",
+    "cordova.plugins.diagnostic": "3.6.7"
 }
 // BOTTOM OF METADATA
 });

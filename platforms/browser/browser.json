@@ -35,6 +35,9 @@
         },
         "cordova-plugin-compat": {
             "PACKAGE_NAME": "com.phonegap.helloworld"
+        },
+        "cordova.plugins.diagnostic": {
+            "PACKAGE_NAME": "com.phonegap.helloworld"
         }
     },
     "dependent_plugins": {},
@@ -161,6 +164,7 @@
         "cordova-plugin-device": "1.1.6",
         "com.dbaq.cordova.contactsPhoneNumbers": "0.0.9",
         "cordova-plugin-contacts": "2.3.1",
-        "cordova-plugin-compat": "1.0.0"
+        "cordova-plugin-compat": "1.0.0",
+        "cordova.plugins.diagnostic": "3.6.7"
     }
 }

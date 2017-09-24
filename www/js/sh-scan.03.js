@@ -596,16 +596,38 @@ $$(document).on('click', 'a[scan-type="history-category"]', function (e) {
 });
 
 $$(document).on('click', 'a[linktype="share"]', function (e) {
-    console.log("Contacts: " + navigator.contacts.length);
-    navigator.contacts.pickContact(function (contact) {
-        var name = contact.displayName;
-        console.log('The following contact has been selected:' + name);
-        myApp.alert("Sharing scan with "+name);
-    }, function (err) {
-        console.log('Error: ' + err);
+    //console.log("Contacts: " + navigator.contacts.length);
+
+    cordova.plugins.diagnostic.getContactsAuthorizationStatus(function (status) {
+        if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
+            console.log("Contacts use is authorized");
+            shareWithContact();
+        } else {
+            cordova.plugins.diagnostic.requestContactsAuthorization(function (status) {
+                if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
+                    console.log("Contacts use is authorized");
+                    shareWithContact();
+                }
+            }, function (error) {
+                console.error(error);
+                myApp.alert("Cannot share scan as authorization to user phonebook is not granted!");
+            });
+        }
+    }, function (error) {
+        console.error("The following error occurred: " + error);
     });
     //myApp.alert("Sharing scan " + $$(this).attr("scanid") + "...");
 });
+
+function shareWithContact() {
+    navigator.contacts.pickContact(function (contact) {
+        var name = contact.displayName;
+        console.log('The following contact has been selected:' + name);
+        myApp.alert("Sharing scan with " + name);
+    }, function (err) {
+        console.log('Error: ' + err);
+    });
+}
 
 $$(document).on('click', 'a[id="sidenav-home"]', function (e) {
     console.log($$("head"));
@@ -643,13 +665,23 @@ $$(document).on('taphold', '.sharescan', function (e) {
             text: 'Share',
             color: 'teal',
             onClick: function () {
-                console.log("Contacts: " + navigator.contacts.length);
-                navigator.contacts.pickContact(function (contact) {
-                    var name = contact.displayName;
-                    console.log('The following contact has been selected:' + name);
-                    myApp.alert("Sharing scan with " + name);
-                }, function (err) {
-                    console.log('Error: ' + err);
+                cordova.plugins.diagnostic.getContactsAuthorizationStatus(function (status) {
+                    if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
+                        console.log("Contacts use is authorized");
+                        shareWithContact();
+                    } else {
+                        cordova.plugins.diagnostic.requestContactsAuthorization(function (status) {
+                            if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
+                                console.log("Contacts use is authorized");
+                                shareWithContact();
+                            }
+                        }, function (error) {
+                            console.error(error);
+                            myApp.alert("Cannot share scan as authorization to user phonebook is not granted!");
+                        });
+                    }
+                }, function (error) {
+                    console.error("The following error occurred: " + error);
                 });
             }
         },

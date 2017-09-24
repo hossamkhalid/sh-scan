@@ -6,15 +6,18 @@
     },
     "displayName": "Medi Scanner",
     "dependencies": {
+        "cordova-android": "^5.0.0",
         "cordova-plugin-compat": "^1.0.0",
         "cordova-plugin-contacts": "^2.3.1",
         "cordova-plugin-contacts-phonenumbers": "0.0.9",
-        "cordova-plugin-device": "^1.1.6"
+        "cordova-plugin-device": "^1.1.6",
+        "cordova.plugins.diagnostic": "^3.6.7"
     },
     "cordova": {
         "plugins": {
             "cordova-plugin-device": {},
-            "cordova-plugin-contacts": {}
+            "cordova-plugin-contacts": {},
+            "cordova.plugins.diagnostic": {}
         }
     }
 }
