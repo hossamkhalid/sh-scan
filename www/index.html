@@ -172,24 +172,25 @@
                 </div>
             </div>
 
-            <div class="toolbar tabbar tabbar-labels hiddenItem" id="toolbar" >
-                <div class="toolbar-inner">
-                    <a href="#history" id="tabbar-patient" class="tab-link bg-teal">
-                        <i id="tabbar-patient-i" class="icon f7-icons color-white">person</i>
-                        <span id="tabbar-patient-span" class="tabbar-label color-white">Patient</span>
-                    </a>
-                    <a href="#history" id="tabbar-consultant" class="tab-link">
-                        <i id="tabbar-consultant-i" class="icon f7-icons color-teal">person</i>
-                        <span id="tabbar-consultant-span" class="tabbar-label">Consultant</span>
-                    </a>
-                </div>
-            </div>
+            
             
             <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
             <div class="pages navbar-through">
                 <!-- Page, "data-page" contains page name -->
                 <div data-page="index" class="page">
                     <div class="page-content">
+                        <div class="toolbar tabbar tabbar-labels hiddenItem" id="toolbar">
+                            <div class="toolbar-inner">
+                                <a href="#history" id="tabbar-patient" class="tab-link bg-teal">
+                                    <i id="tabbar-patient-i" class="icon f7-icons color-white">person</i>
+                                    <span id="tabbar-patient-span" class="tabbar-label color-white">Patient</span>
+                                </a>
+                                <a href="#history" id="tabbar-consultant" class="tab-link">
+                                    <i id="tabbar-consultant-i" class="icon f7-icons color-teal">person</i>
+                                    <span id="tabbar-consultant-span" class="tabbar-label">Consultant</span>
+                                </a>
+                            </div>
+                        </div>
                         <div class="list-block inset">
                             <ul id="history-category-scans-list">
                                 <li>
