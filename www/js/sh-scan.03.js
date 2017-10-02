@@ -713,6 +713,7 @@ $$(document).on('click', 'a[class="contact"]', function (e) {
 });
 
 function onError(contactError) {
+    myApp.hidePreloader();
     console.log('onError!');
 };
 
@@ -774,7 +775,10 @@ function shareWithContact(scanid) {
             //myApp.popup('.popup-contacts');
             console.log('Filtered to ' + cons.length + ' contacts.');
         },
-        onError);
+        function (contactError) {
+            myApp.hidePreloader();
+            console.log('onError!');
+        });
     myApp.showPreloader();
     //console.log("Start: " + Math.floor(Date.now() / 1000));
 
