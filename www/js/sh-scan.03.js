@@ -13,6 +13,8 @@ var scanValue = "";
 var ibmClientId = "";
 var ibmClientSecret = "";
 var patientId = "";
+var isConsultant = false;
+var userPhone = "";
 
 // Add view
 var mainView = myApp.addView('.view-main', {
@@ -110,6 +112,9 @@ function loadIndexPage() {
             cache: false,
             success: function (data) {
                 osKey = data[0].keyvalue;
+                if (isConsultant) {
+                    $$('#toolbar').removeClass('hiddenItem');
+                }
                 loadSettings();
                 loadHistoryCategory();
             },
@@ -117,7 +122,11 @@ function loadIndexPage() {
                 myApp.alert("Error Getting Keys: " + xhr.responseText);
             }
         });
-    } 
+    }
+
+    if (isConsultant) {
+        //hide toolbar
+    }
 
     $$.ajax({
         type: "GET",
@@ -231,9 +240,14 @@ function loadHistory() {
 }
 
 function loadHistoryCategory() {
+    $$('#tabbar-consultant-i, #tabbar-consultant-span').removeClass('color-white');
+    $$('#tabbar-consultant-i').addClass('color-teal');
+    $$('#tabbar-consultant').removeClass('bg-teal');
+    $$('#tabbar-patient-i, #tabbar-patient-span').addClass('color-white');
+    $$('#tabbar-patient-i').removeClass('color-teal');
+    $$('#tabbar-patient').addClass('bg-teal');
     myApp.showPreloader();
 
-    console.log("start");
     var historyPageCache = window.localStorage.getItem("sh-scan-cache-history-category");
     var historyPageCacheExpiry = window.localStorage.getItem("sh-scan-cache-history-category-expiry");
 
@@ -339,6 +353,24 @@ function loadHistoryCategory() {
     }  
 }
 
+function loadHistoryCategoryConsultant() {
+    $$('#tabbar-patient-i, #tabbar-patient-span').removeClass('color-white');
+    $$('#tabbar-patient-i').addClass('color-teal');
+    $$('#tabbar-patient').removeClass('bg-teal');
+    $$('#tabbar-consultant-i, #tabbar-consultant-span').addClass('color-white');
+    $$('#tabbar-consultant-i').removeClass('color-teal');
+    $$('#tabbar-consultant').addClass('bg-teal');
+    myApp.showPreloader();
+
+    console.log("cache valid - history category page");
+    for (var i = 0; i < cats.length; i++) {
+        $$('#history-category-' + cats[i]).text(0);
+        $$('#history-category-new-' + cats[i]).text("folder");
+    }
+
+    myApp.hidePreloader();
+}
+
 function clearHistoryCategoryCache() {
     window.localStorage.removeItem("sh-scan-new-notification");
     window.localStorage.removeItem("sh-scan-cache-history-category");
@@ -434,7 +466,9 @@ function login(username, password) {
                     window.localStorage.setItem("sh-scan-activated", "true");
                 } else {
                     window.localStorage.setItem("sh-scan-activated", "false");
-                }                
+                }
+                isConsultant = data.isconsultant;
+                userPhone = data.phone;
                 loadIndexPage();
                 myApp.closeModal('.login-screen');                
                 
@@ -479,10 +513,11 @@ function loginDevice() {
                         ibmClientId = data.key;
                         ibmClientSecret = data.secret;
                         patientId = data.patientid;
-                        console.log("here");
                         window.localStorage.setItem("sh-scan-id", patientId);
                         window.localStorage.setItem("sh-scan-device-id", obj.deviceid);
                         window.localStorage.setItem("sh-scan-activated", "true");
+                        isConsultant = data.isconsultant;
+                        userPhone = data.phone;
                         loadIndexPage();
                         myApp.hidePreloader();
                     } else {
@@ -597,36 +632,155 @@ $$(document).on('click', 'a[scan-type="history-category"]', function (e) {
 
 $$(document).on('click', 'a[linktype="share"]', function (e) {
     //console.log("Contacts: " + navigator.contacts.length);
-
-    cordova.plugins.diagnostic.getContactsAuthorizationStatus(function (status) {
-        if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-            console.log("Contacts use is authorized");
-            shareWithContact();
-        } else {
-            cordova.plugins.diagnostic.requestContactsAuthorization(function (status) {
-                if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                    console.log("Contacts use is authorized");
-                    shareWithContact();
-                }
-            }, function (error) {
-                console.error(error);
-                myApp.alert("Cannot share scan as authorization to user phonebook is not granted!");
-            });
-        }
-    }, function (error) {
-        console.error("The following error occurred: " + error);
-    });
+    var scanId = $$(this).attr("scanid");
+    shareWithContact(scanId);
+    
     //myApp.alert("Sharing scan " + $$(this).attr("scanid") + "...");
 });
 
-function shareWithContact() {
-    navigator.contacts.pickContact(function (contact) {
-        var name = contact.displayName;
-        console.log('The following contact has been selected:' + name);
-        myApp.alert("Sharing scan with " + name);
-    }, function (err) {
-        console.log('Error: ' + err);
-    });
+
+function onSuccess(c) {
+    var defaultPhoneCountry = (libphonenumber.parse(userPhone)).country;
+    var htmlObj = '';
+
+    console.log("End: " + Math.floor(Date.now() / 1000));
+    console.log('Found ' + c.length + ' contacts.');
+    var cons = [];
+    for (var i = 0; i < c.length;i++){
+        if (c[i].phoneNumbers != null) {
+            var isValidPhone = false;
+            var phoneCountry = "";
+            var phoneType = "";
+            if (libphonenumber.isValidNumber(c[i].phoneNumbers[0].value, defaultPhoneCountry)) {
+                isValidPhone = true;
+                phoneCountry = defaultPhoneCountry;
+                phoneType = libphonenumber.getNumberType(c[i].phoneNumbers[0].value, defaultPhoneCountry);
+            } else if (libphonenumber.isValidNumber(c[i].phoneNumbers[0].value, "EG")) {
+                isValidPhone = true;
+                phoneCountry = "EG";
+                phoneType = libphonenumber.getNumberType(c[i].phoneNumbers[0].value, "EG");
+            } else if (libphonenumber.isValidNumber(c[i].phoneNumbers[0].value, "GB")) {
+                isValidPhone = true;
+                phoneCountry = "GB";
+                phoneType = libphonenumber.getNumberType(c[i].phoneNumbers[0].value, "GB");
+            } else {
+                isValidPhone = false;
+            }
+
+            var searchtype = "Mobile";
+            if (isValidPhone) {
+                var phoneNumber = libphonenumber.format(libphonenumber.parse(c[i].phoneNumbers[0].value, phoneCountry), 'International');
+                htmlObj += '<li>';
+                //htmlObj += '<div class="swipeout-content item-content">';
+                htmlObj += '<a href="#" class="back item-link item-content" contactType="contact" displayName="' + c[i].displayName + '" phoneNumber="' + phoneNumber + '">';
+                if (c[i].photos != null) {
+                    htmlObj += '<div class="item-media"><img class="f7-icons" style="border-radius: 50%;" height="50" width="50" src="' + c[i].photos[0].value + '"></img></div>';
+                } else {
+                    htmlObj += '<div class="item-media"><i class="f7-icons color-teal" style="font-size: 50px;">person</i></div>';
+                }
+                htmlObj += '<div class="item-inner">';
+                htmlObj += '<div class="item-title-row">';
+                htmlObj += '<div class="item-title">' + c[i].displayName + '</div>';
+                //htmlObj += '<div class="item-after">' + timestampToDateTime(data[i].scandate) + '</div>';
+                htmlObj += '</div>';
+                //alert(libphonenumber.isValidNumber("01001903337", "EG"));
+                //alert(libphonenumber.format(libphonenumber.parse("01001903337", "EG"), 'International'));
+                htmlObj += '<div class="item-subtitle">' + phoneNumber + '</div>';
+
+                htmlObj += '</div>';
+                htmlObj += '</a>';
+                //htmlObj += '</div>';
+                htmlObj += '</li>';
+
+                cons[cons.length] = c[i];
+            }
+        }
+    }
+    $$('#contact-list').html(htmlObj);
+    myApp.hidePreloader();
+    mainView.router.load({ pageName: 'contacts' });
+    //myApp.popup('.popup-contacts');
+    console.log('Filtered to ' + cons.length + ' contacts.');
+};
+
+$$(document).on('click', 'a[contactType="contact"]', function (e) {
+    myApp.alert("Sharing with " + $$(this).attr("displayName") + ' ' + $$(this).attr("phoneNumber") + 'Scan ' + $$(this).attr("scanid"));
+});
+$$(document).on('click', 'a[class="contact"]', function (e) {
+    //$$('.contact').on('click', function () {
+    
+    
+});
+
+function onError(contactError) {
+    console.log('onError!');
+};
+
+
+function shareWithContact(scanid) {
+    
+    navigator.contacts.find(
+        [navigator.contacts.fieldType.displayName],
+        function (c) {
+            var defaultPhoneCountry = (libphonenumber.parse(userPhone)).country;
+            var htmlObj = '';
+
+            console.log("End: " + Math.floor(Date.now() / 1000));
+            console.log('Found ' + c.length + ' contacts.');
+            var cons = [];
+            for (var i = 0; i < c.length; i++) {
+                if (c[i].phoneNumbers != null) {
+                    var isValidPhone = false;
+                    var phoneCountry = "";
+                    var phoneType = "";
+                    if (c[i].phoneNumbers[0].value.startsWith("00") || c[i].phoneNumbers[0].value.startsWith("+")) {
+                        isValidPhone = true;
+                    } else {
+                        isValidPhone = false;
+                    }
+
+                    var searchtype = "Mobile";
+                    if (isValidPhone) {
+                        var phoneNumber = c[i].phoneNumbers[0].value;//, phoneCountry), 'International');
+                        htmlObj += '<li>';
+                        //htmlObj += '<div class="swipeout-content item-content">';
+                        htmlObj += '<a href="#" class="back item-link item-content" contactType="contact" displayName="' + c[i].displayName + '" phoneNumber="' + phoneNumber + '" scanid="' + scanid + '">';
+                        if (c[i].photos != null) {
+                            htmlObj += '<div class="item-media"><img class="f7-icons" style="border-radius: 50%;" height="50" width="50" src="' + c[i].photos[0].value + '"></img></div>';
+                        } else {
+                            htmlObj += '<div class="item-media"><i class="f7-icons color-teal" style="font-size: 50px;">person</i></div>';
+                        }
+                        htmlObj += '<div class="item-inner">';
+                        htmlObj += '<div class="item-title-row">';
+                        htmlObj += '<div class="item-title">' + c[i].displayName + '</div>';
+                        //htmlObj += '<div class="item-after">' + timestampToDateTime(data[i].scandate) + '</div>';
+                        htmlObj += '</div>';
+                        //alert(libphonenumber.isValidNumber("01001903337", "EG"));
+                        //alert(libphonenumber.format(libphonenumber.parse("01001903337", "EG"), 'International'));
+                        htmlObj += '<div class="item-subtitle">' + phoneNumber + '</div>';
+
+                        htmlObj += '</div>';
+                        htmlObj += '</a>';
+                        //htmlObj += '</div>';
+                        htmlObj += '</li>';
+
+                        cons[cons.length] = c[i];
+                    }
+                }
+            }
+            $$('#contact-list').html(htmlObj);
+            myApp.hidePreloader();
+            mainView.router.load({ pageName: 'contacts' });
+            //myApp.popup('.popup-contacts');
+            console.log('Filtered to ' + cons.length + ' contacts.');
+        },
+        onError);
+    myApp.showPreloader();
+    //console.log("Start: " + Math.floor(Date.now() / 1000));
+
+    /*
+    
+    */
 }
 
 $$(document).on('click', 'a[id="sidenav-home"]', function (e) {
@@ -665,24 +819,7 @@ $$(document).on('taphold', '.sharescan', function (e) {
             text: 'Share',
             color: 'teal',
             onClick: function () {
-                cordova.plugins.diagnostic.getContactsAuthorizationStatus(function (status) {
-                    if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                        console.log("Contacts use is authorized");
-                        shareWithContact();
-                    } else {
-                        cordova.plugins.diagnostic.requestContactsAuthorization(function (status) {
-                            if (status === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                                console.log("Contacts use is authorized");
-                                shareWithContact();
-                            }
-                        }, function (error) {
-                            console.error(error);
-                            myApp.alert("Cannot share scan as authorization to user phonebook is not granted!");
-                        });
-                    }
-                }, function (error) {
-                    console.error("The following error occurred: " + error);
-                });
+                shareWithContact(scanid);                
             }
         },
         {
@@ -759,6 +896,14 @@ $$('#activateBtn').on('click', function () {
 
 $$('#logoutBtn').on('click', function () {
     logout();
+});
+
+$$('#tabbar-patient').on('click', function () {
+    loadHistoryCategory();
+});
+
+$$('#tabbar-consultant').on('click', function () {
+    loadHistoryCategoryConsultant();
 });
 
 function activate(code) {

@@ -23,6 +23,9 @@
 
     <script type="text/javascript" src="js/sha.js"></script>
 
+    <script src="js/input-format.min.js"></script>
+    <script src="js/libphonenumber-js.min.js"></script>
+
     <style>
         div.gallery {
             border: 1px solid #ccc;
@@ -169,15 +172,15 @@
                 </div>
             </div>
 
-            <div class="toolbar tabbar tabbar-labels">
+            <div class="toolbar tabbar tabbar-labels hiddenItem" id="toolbar" >
                 <div class="toolbar-inner">
-                    <a href="#" class="tab-link bg-teal">
-                        <i class="icon f7-icons color-white">person</i>
-                        <span class="tabbar-label color-white">Patient</span>
+                    <a href="#history" id="tabbar-patient" class="tab-link bg-teal">
+                        <i id="tabbar-patient-i" class="icon f7-icons color-white">person</i>
+                        <span id="tabbar-patient-span" class="tabbar-label color-white">Patient</span>
                     </a>
-                    <a href="#" class="tab-link">
-                        <i class="icon f7-icons color-teal">person</i>
-                        <span class="tabbar-label">Consultant</span>
+                    <a href="#history" id="tabbar-consultant" class="tab-link">
+                        <i id="tabbar-consultant-i" class="icon f7-icons color-teal">person</i>
+                        <span id="tabbar-consultant-span" class="tabbar-label">Consultant</span>
                     </a>
                 </div>
             </div>
@@ -526,6 +529,61 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
+                </div>
+
+                <div class="page cached" data-page="contacts" id="contacts-page">
+                    <form data-search-list=".list-block-search" data-search-in=".item-title" class="searchbar searchbar-init">
+                        <div class="searchbar-input">
+                            <input type="search" placeholder="Search"><a href="#" class="searchbar-clear"></a>
+                        </div><a href="#" class="searchbar-cancel">Cancel</a>
+                    </form>
+
+                    <!-- Search Bar overlay-->
+                    <div class="searchbar-overlay"></div>
+                    <div class="page-content">
+                        <div class="content-block searchbar-not-found">
+                            Nothing found
+                        </div>
+                        <div class="list-block media-list list-block-search searchbar-found">
+                            <ul id="contact-list">
+                                <li>
+                                    <a href="#" class="item-link item-content pb-page">
+                                        <div class="item-media"><i class="f7-icons color-teal">person</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title-row">
+                                                <div class="item-title">Contact Name</div>
+                                            </div>
+                                            <div class="item-subtitle">+447714703103</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link item-content pb-page">
+                                        <div class="item-media"><i class="f7-icons color-teal">person</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title-row">
+                                                <div class="item-title">Contact Name</div>
+                                            </div>
+                                            <div class="item-subtitle">+447714703103</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link item-content pb-page">
+                                        <div class="item-media"><i class="f7-icons color-teal">person</i></div>
+                                        <div class="item-inner">
+                                            <div class="item-title-row">
+                                                <div class="item-title">Contact Name</div>
+                                            </div>
+                                            <div class="item-subtitle">+447714703103</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <br />
+                        <br />
                     </div>
                 </div>
             </div>
