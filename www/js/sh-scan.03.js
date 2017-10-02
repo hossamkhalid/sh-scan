@@ -719,7 +719,15 @@ function onError(contactError) {
 
 
 function shareWithContact(scanid) {
-    
+    navigator.contacts.pickContact(function (contact) {
+        var displayName = contact.displayName;
+        var phoneNumber = contact.phoneNumbers[0].value;
+        myApp.alert("Sharing with " + displayName + ' ' + phoneNumber + ' Scan ' + scanid);
+        console.log('The following contact has been selected:' + JSON.stringify(contact));
+    }, function (err) {
+        console.log('Error: ' + err);
+    });
+    /*
     navigator.contacts.find(
         [navigator.contacts.fieldType.displayName],
         function (c) {
